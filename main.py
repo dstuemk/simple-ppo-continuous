@@ -1,4 +1,5 @@
 import sys
+import pathlib
 import gym
 import numpy as np
 import tensorflow as tf
@@ -86,6 +87,7 @@ class Learner:
         self.advantage_estimator = advantage_estimator
 
     def save(self):
+        pathlib.Path(self.weights_folder).mkdir(parents=True, exist_ok=True)
         self.actor.model.save_weights(self.weights_folder + "/actor.ckpt")
         self.critic.model.save_weights(self.weights_folder + "/critic.ckpt")
 
