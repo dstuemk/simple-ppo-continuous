@@ -10,7 +10,7 @@ Usage:
 
 The advantage value is calculated using the Generalized Advantage Estimation (GAE) Method. When reading through the source code one might wonder about the usge of ```LinearOperatorToeplitz```. This operator lets us calculate the GAE values with a simple Matrix-Vector multiplication:
 
-![Matrix-Vector multiplication](https://latex.codecogs.com/svg.image?%5Cbegin%7Bpmatrix%7D1%20&%20%5Cgamma%5Clambda%20&%20(%5Cgamma%5Clambda)%5E2%20&%20%5Chdots%20%5C%5C%20&%201%20&%20%5Cgamma%5Clambda%20&%20%20%5C%5C%20&%20%20&%201%20&%20%5Cddots%20%5C%5C%20&%20%20&%20%20&%20%5Cddots%20%5C%5C%5Cend%7Bpmatrix%7D%5Ccdot%5Cbegin%7Bpmatrix%7D%5Cdelta_1%20%5C%5C%5Cdelta_2%20%5C%5C%5Cdelta_3%20%5C%5C%5Cvdots%5Cend%7Bpmatrix%7D=%20%5Cbegin%7Bpmatrix%7D%5Chat%7BA%7D_1%20%5C%5C%5Chat%7BA%7D_2%20%5C%5C%5Chat%7BA%7D_3%20%5C%5C%5Cvdots%5Cend%7Bpmatrix%7D%20)
+![Matrix-Vector multiplication](https://latex.codecogs.com/svg.image?%20%5Cbegin%7Bpmatrix%7D%5Chat%7BA%7D_1%20%5C%5C%5Chat%7BA%7D_2%20%5C%5C%5Chat%7BA%7D_3%20%5C%5C%5Cvdots%5Cend%7Bpmatrix%7D%20=%5Cbegin%7Bpmatrix%7D1%20&%20%5Cgamma%5Clambda%20&%20(%5Cgamma%5Clambda)%5E2%20&%20%5Chdots%20%5C%5C%20&%201%20&%20%5Cgamma%5Clambda%20&%20%20%5C%5C%20&%20%20&%201%20&%20%5Cddots%20%5C%5C%20&%20%20&%20%20&%20%5Cddots%20%5C%5C%5Cend%7Bpmatrix%7D%5Ccdot%5Cbegin%7Bpmatrix%7D%5Cdelta_1%20%5C%5C%5Cdelta_2%20%5C%5C%5Cdelta_3%20%5C%5C%5Cvdots%5Cend%7Bpmatrix%7D)
 
 The ![delta](https://latex.codecogs.com/svg.image?%5Cdelta) terms are the temporal difference errors (TD-errors):
 
