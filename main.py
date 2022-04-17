@@ -1,4 +1,5 @@
 import sys
+import time
 import pathlib
 import gym
 import numpy as np
@@ -6,6 +7,8 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 tfd = tfp.distributions
+
+from multiproc_env import *
 
 ENVIRONMENT = 'Pendulum-v0'
 STATE_DIMS = 3
@@ -28,7 +31,7 @@ class AdvantageEstimator:
         """
         values = tf.cast(values, tf.float32)
         rewards = tf.cast(rewards, tf.float32)
-        toeplitz_c = tf.concat([[[1.0]], tf.zeros([1, rewards.shape[1]-1])], axis=1)
+        toeplitz_c = tf.concat([[1.0], tf.zeros(rewards.shape[1]-1)],axis=0)
         toeplitz_r = tf.pow(self.lmda*self.gamma, 
             tf.linspace(0.0, rewards.shape[1]-1.0, rewards.shape[1]))
         toeplitz_m = tf.linalg.LinearOperatorToeplitz(toeplitz_c, toeplitz_r)
@@ -107,29 +110,49 @@ class Learner:
         env.close()
 
     def train(self, I_iterations, N_trajectories, T_timesteps, K_epochs):
+        multiproc_env = MultiprocEnv(ENVIRONMENT, N_trajectories)
         for iter_idx in range(I_iterations):
             # Sample trajectories with current policy
             probs_all = np.zeros([N_trajectories, T_timesteps, 1])
             rewards_all = np.zeros([N_trajectories, T_timesteps, 1])
             actions_all = np.zeros([N_trajectories, T_timesteps, ACTION_DIMS])
             states_all = np.zeros([N_trajectories, T_timesteps + 1, STATE_DIMS])
-            for traj_idx in range(N_trajectories):
-                env = gym.make(ENVIRONMENT).env
-                state = np.reshape(env.reset(), (1,1,-1))
-                for step_idx in range(T_timesteps):
-                    action_distr = self.actor.act(state)
-                    action = action_distr.sample()
-                    state_next,reward,done,_ = env.step(action)
-                    probs_all[traj_idx, step_idx, :] = action_distr.prob(action)
-                    rewards_all[traj_idx, step_idx, :] = reward
-                    actions_all[traj_idx, step_idx, :] = action
-                    states_all[traj_idx, step_idx, :] = np.reshape(state, (-1))
-                    state = np.reshape(state_next, (1,1,-1))              
-                states_all[traj_idx, step_idx + 1, :] = state
+            
+            t_start  = time.process_time()
+            states = multiproc_env.reset()
+            for step_idx in range(T_timesteps):
+                action_distr = self.actor.act(np.reshape(states, (-1,1,STATE_DIMS)))
+                action = action_distr.sample()
+                states_next,rewards,dones = multiproc_env.step(action)
+                probs_all[:, step_idx, :] = action_distr.prob(action)
+                rewards_all[:, step_idx, :] = np.reshape(rewards, rewards_all[:, step_idx, :].shape)
+                actions_all[:, step_idx, :] = np.reshape(action, actions_all[:, step_idx, :].shape)
+                states_all[:, step_idx, :] = np.reshape(states, states_all[:, step_idx, :].shape)
+                states = states_next
+            states_all[:, step_idx+1, :] = np.reshape(states, states_all[:, step_idx+1, :].shape)
+            t_elapsed = time.process_time() - t_start
+            
+            #t_start  = time.process_time()
+            #for traj_idx in range(N_trajectories):
+            #    env = gym.make(ENVIRONMENT).env
+            #    state = np.reshape(env.reset(), (1,1,-1))
+            #    for step_idx in range(T_timesteps):
+            #        action_distr = self.actor.act(state)
+            #        action = action_distr.sample()
+            #        state_next,reward,done,_ = env.step(action)
+            #        probs_all[traj_idx, step_idx, :] = action_distr.prob(action)
+            #        rewards_all[traj_idx, step_idx, :] = reward
+            #        actions_all[traj_idx, step_idx, :] = action
+            #        states_all[traj_idx, step_idx, :] = np.reshape(state, (-1))
+            #        state = np.reshape(state_next, (1,1,-1))              
+            #    states_all[traj_idx, step_idx + 1, :] = state
+            #t_elapsed = time.process_time() - t_start
+
             print( "\n")
             print( ".-----------------------------------------")
-            print(f"| Rollout: {iter_idx}                     ")
+            print(f"| Rollout: {iter_idx:.3f}                 ")
             print( "|-----------------------------------------")
+            print(f"| Elapsed:     {t_elapsed} sec.           ")
             print(f"| Avg. Reward: {np.mean(rewards_all):.3f} ")
             print(f"| Std. Reward: {np.std(rewards_all):.3f}  ")
             print( "'-----------------------------------------")
@@ -190,7 +213,7 @@ if __name__ == '__main__':
     critic = Critic()
     learner = Learner(actor, critic, gae)
 
-    if sys.argv[1] == "train":
+    if len(sys.argv) < 2 or sys.argv[1] == "train":
         learner.train(350, 10, 200, 100)
         learner.save()
     elif sys.argv[1] == "enjoy":
