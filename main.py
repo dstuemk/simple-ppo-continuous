@@ -150,7 +150,7 @@ class Learner:
 
             print( "\n")
             print( ".-----------------------------------------")
-            print(f"| Rollout: {iter_idx:.3f}                 ")
+            print(f"| Rollout: {iter_idx}                 ")
             print( "|-----------------------------------------")
             print(f"| Elapsed:     {t_elapsed} sec.           ")
             print(f"| Avg. Reward: {np.mean(rewards_all):.3f} ")
