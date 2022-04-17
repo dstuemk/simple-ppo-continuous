@@ -16,6 +16,12 @@ class MultiprocEnv:
             p = multiprocessing.Process(target=MultiprocEnv._proc_worker, args=(q_out,q_in,env_id,))
             self.procs.append(p)
             p.start()
+    
+    def __del__(self):
+        for q in self.queues_out:
+            q.put({'cmd': 'exit'})
+        for p in self.procs:
+            p.join()
 
     def _proc_worker(queue_in, queue_out, env_id):
         env = gym.make(env_id).env
@@ -29,6 +35,8 @@ class MultiprocEnv:
                 action = cmd_obj['action']
                 state_next,reward,done,_ = env.step(action)
                 queue_out.put((state_next,reward,done))
+            elif cmd_obj['cmd'] == 'exit':
+                term = True
             else:
                 print("Invalid command")
 
