@@ -40,7 +40,6 @@ class MultiprocEnv:
             else:
                 print("Invalid command")
 
-
     def reset(self):
         states = []
         for q_idx in range(self.N_workers):
