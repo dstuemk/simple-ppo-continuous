@@ -213,7 +213,7 @@ if __name__ == '__main__':
     critic = Critic()
     learner = Learner(actor, critic, gae)
 
-    if len(sys.argv) < 2 or sys.argv[1] == "train":
+    if sys.argv[1] == "train":
         learner.train(350, 10, 200, 100)
         learner.save()
     elif sys.argv[1] == "enjoy":
