@@ -131,22 +131,6 @@ class Learner:
                 states = states_next
             states_all[:, step_idx+1, :] = np.reshape(states, states_all[:, step_idx+1, :].shape)
             t_elapsed = time.process_time() - t_start
-            
-            #t_start  = time.process_time()
-            #for traj_idx in range(N_trajectories):
-            #    env = gym.make(ENVIRONMENT).env
-            #    state = np.reshape(env.reset(), (1,1,-1))
-            #    for step_idx in range(T_timesteps):
-            #        action_distr = self.actor.act(state)
-            #        action = action_distr.sample()
-            #        state_next,reward,done,_ = env.step(action)
-            #        probs_all[traj_idx, step_idx, :] = action_distr.prob(action)
-            #        rewards_all[traj_idx, step_idx, :] = reward
-            #        actions_all[traj_idx, step_idx, :] = action
-            #        states_all[traj_idx, step_idx, :] = np.reshape(state, (-1))
-            #        state = np.reshape(state_next, (1,1,-1))              
-            #    states_all[traj_idx, step_idx + 1, :] = state
-            #t_elapsed = time.process_time() - t_start
 
             print( "\n")
             print( ".-----------------------------------------")
