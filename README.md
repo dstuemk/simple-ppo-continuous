@@ -1,6 +1,6 @@
 # Continuous PPO with Tensorflow 2.0
 
-A minimalistic implementation of OpenAI's proximal policy optimization algorithm. It learns to swing up a pendulum (from OpenAI Gym). There is much room for performance improvement, so far computation happens on only 1 CPU/GPU even if more ressources are available.
+A minimalistic implementation of OpenAI's proximal policy optimization algorithm. It learns to swing up a pendulum (from OpenAI Gym). There is much room for performance improvement, so far training computation happens on only 1 GPU even if more ressources are available.
 
 Usage:
 * To train the agent run ```python main.py train```
